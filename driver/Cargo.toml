@@ -1,6 +1,13 @@
 [package]
-name = "driver"
+name = "plc_driver"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+serde = { version = "1.0.219", features = ["derive"]}
+serde_derive = "1.0"
+tokio = { version = "1", features = ["full"], optional = true }
+
+[features]
+default = ["driver"]
+driver = ["dep:tokio"]
