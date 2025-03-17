@@ -1,5 +1,5 @@
 [workspace]
-members = ["commands"
-, "driver"]
+members = ["wago/commands"
+, "wago/driver"]
 
 resolver = "2"
