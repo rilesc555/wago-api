@@ -7,9 +7,7 @@ pub struct TargetProperties {
 
 impl TargetProperties {
     pub fn new(ip: &str) -> Self {
-        return Self {
-            ip: ip.to_string(),
-        };
+        return Self { ip: ip.to_string() };
     }
 }
 
