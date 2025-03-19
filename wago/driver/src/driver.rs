@@ -7,7 +7,7 @@ use tokio::sync::{broadcast, Mutex};
 use tokio_modbus::client::tcp;
 use tokio_modbus::client::Context;
 use wago_commands::command::{Command, Message};
-use wago_commands::response::{self, Response};
+use wago_commands::response::Response;
 
 #[derive(Debug)]
 pub struct WagoDriver {
