@@ -1,2 +1,9 @@
 #[derive(Debug, Clone)]
-pub enum Response {}
+pub enum ReadResponse {
+    LoadCellResponse,
+    ToolProbeResponse,
+    TempSensorResponse,
+    PressureGaugeResponse,
+}
+
+pub enum WriteResponse {}

@@ -1,14 +1,22 @@
 use serde::{Deserialize, Serialize};
+use strum::IntoEnumIterator;
+use strum_macros::EnumIter;
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, EnumIter)]
+pub enum ReadCommand {
+    ReadLoadCell,
+    ReadToolProbe,
+    ReadTempSensors,
+    ReadPressureGauge,
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub enum Command {
-    TestCommand(String),
-}
+pub enum WriteCommand {}
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Message {
     pub priority: Priority,
-    pub command: Command,
+    pub command: WriteCommand,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
