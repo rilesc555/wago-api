@@ -9,7 +9,7 @@ use tokio_modbus::client::Context;
 use tokio_modbus::client::{tcp, Writer};
 use wago_commands::command::{Message, ReadCommand, WriteCommand};
 use wago_commands::data_types::types::Solenoid;
-use wago_commands::response::{self, ReadResponse, Response};
+use wago_commands::response::{self, ReadResponse, Response, WriteResponse};
 use wago_commands::solenoid::SetSolenoid;
 
 #[derive(Debug)]
@@ -88,11 +88,13 @@ fn spawn_queue_loop(
     })
 }
 
-fn send_write_command(command: WriteCommand, port: &mut Context) -> Response {
+async fn send_write_command(command: WriteCommand, port: &mut Context) -> Response {
     match command {
         WriteCommand::SetSolenoid(set_solenoid) => {
-
-            let command_response = match solenoid_write(port, set_solenoid.solenoid).await?
+            let command_response = match solenoid_write(port, set_solenoid.solenoid).await? {
+                Ok(response) => response,
+                Err(e) => Response::WriteError(e),
+            };
         }
     }
 }
@@ -107,31 +109,35 @@ fn send_read_command(command: ReadCommand, port: &mut Context) -> ReadResponse {
 }
 
 //entry function
-pub async fn solenoid_write(port: &mut Context, solenoid_variant: Solenoid) -> Result<(), Box<dyn Error>> {
+pub async fn solenoid_write(
+    port: &mut Context,
+    solenoid_command: Solenoid,
+) -> Result<Response, Box<dyn Error>> {
     loop {
-        match state {
-            Trigger::Extrude => {
+        match solenoid_command {
+            Solenoid::Extrude => {
                 //switch to extrude
                 let mut locked_plc = plc.lock().await;
                 let _ = locked_plc.write_single_coil(W_COIL1, false).await?; // turn refill sol off
                 let _ = locked_plc.write_single_coil(W_COIL0, true).await?; // turn extrude sol on
+                response = Response::SetSolenoidResponse(solenoid_command)
             }
 
-            Trigger::Refill => {
+            Solenoid::Refill => {
                 //switch to refill
                 let mut locked_plc = plc.lock().await;
                 let _ = locked_plc.write_single_coil(W_COIL0, false).await?; // turn extrude sol off
                 let _ = locked_plc.write_single_coil(W_COIL1, true).await?; // turn refill sol on
+                response = Response::SetSolenoidResponse(solenoid_command)
             }
 
-            Trigger::Close => {
+            Solenoid::Close => {
                 //close valves
                 let mut locked_plc = plc.lock().await;
                 let _ = locked_plc.write_single_coil(W_COIL1, false).await?; // turn refill sol off
                 let _ = locked_plc.write_single_coil(W_COIL0, false).await?; // turn extrude sol off
+                response = Response::SetSolenoidResponse(solenoid_command)
             }
         }
-
-        tokio::time::sleep(std::time::Duration::from_millis(500)).await;
     }
 }

@@ -1,3 +1,5 @@
+use crate::data_types::types::Solenoid;
+
 #[derive(Debug, Clone)]
 pub enum ReadResponse {
     LoadCellResponse,
@@ -8,4 +10,7 @@ pub enum ReadResponse {
 
 pub enum WriteResponse {}
 
-pub enum Response {}
+pub enum Response {
+    SetSolenoidResponse(Solenoid),
+    WriteError(error),
+}
