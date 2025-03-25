@@ -1,3 +1,4 @@
+use crate::solenoid::SetSolenoid;
 use serde::{Deserialize, Serialize};
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
@@ -11,7 +12,9 @@ pub enum ReadCommand {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub enum WriteCommand {}
+pub enum WriteCommand {
+    SetSolenoid(SetSolenoid),
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Message {

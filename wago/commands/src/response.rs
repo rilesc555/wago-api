@@ -7,3 +7,5 @@ pub enum ReadResponse {
 }
 
 pub enum WriteResponse {}
+
+pub enum Response {}
