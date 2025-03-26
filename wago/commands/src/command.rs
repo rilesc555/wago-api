@@ -1,25 +1,19 @@
 use crate::solenoid::SetSolenoid;
 use serde::{Deserialize, Serialize};
-use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, EnumIter)]
-pub enum ReadCommand {
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub enum Command {
     ReadLoadCell,
     ReadToolProbe,
     ReadTempSensors,
     ReadPressureGauge,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub enum WriteCommand {
     SetSolenoid(SetSolenoid),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Message {
     pub priority: Priority,
-    pub command: WriteCommand,
+    pub command: Command,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
