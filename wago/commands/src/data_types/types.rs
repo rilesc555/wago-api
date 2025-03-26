@@ -16,7 +16,7 @@ pub struct LoadCell {
 }
 
 impl LoadCell {
-    fn new(load1: f64, load2: f64) -> Self {
+    pub fn new(load1: f64, load2: f64) -> Self {
         Self { load1, load2 }
     }
 }

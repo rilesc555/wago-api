@@ -10,9 +10,9 @@ use tokio::sync::{broadcast, Mutex};
 use tokio_modbus::client::tcp;
 use tokio_modbus::client::{Context, Reader, Writer};
 use wago_commands::command::{ReadCommand, WriteCommand, WriteMessage};
-use wago_commands::data_types::types::Solenoid;
-use wago_commands::response::Response;
-use wago_commands::solenoid::SetSolenoid;
+use wago_commands::data_types::types::{LoadCell, SolenoidCommand};
+use wago_commands::response::{self, Response};
+use wago_commands::solenoid::SetSolenoidCommand;
 
 #[derive(Debug)]
 pub struct WagoDriver {
@@ -61,9 +61,10 @@ impl WagoDriver {
         tokio::spawn(async move {
             let mut port = port.lock().await;
 
-            let data_vec: Vec<Response> = Vec::new();
+            let response_vec: Vec<Response> = Vec::new();
             for command in ReadCommand::iter() {
-                response = self.send_read_command(command, &mut port);
+                let answer = self.send_read_command(command, &mut *port);
+                response_vec.push(answer);
             }
 
             loop {
@@ -88,79 +89,90 @@ impl WagoDriver {
     async fn send_write_command(&mut self, command: WriteCommand, port: &mut Context) -> Response {
         match command {
             WriteCommand::SetSolenoid(set_solenoid) => {
-                let command_response =
-                    match self.solenoid_write(port, set_solenoid.solenoid).await? {
-                        Ok(response) => response,
-                        Err(e) => Response::WriteError(e),
-                    };
+                let command_response = match self
+                    .solenoid_write(port, set_solenoid.solenoid_command)
+                    .await?
+                {
+                    Ok(response) => response,
+                    Err(e) => Response::WriteError(e),
+                };
             }
         }
     }
 
-    async fn send_read_command(&mut self, command: ReadCommand, port: &mut Context) -> Response {
+    async fn send_read_command(
+        &self,
+        command: ReadCommand,
+        port: &mut Context,
+    ) -> Result<Response, Box<dyn Error>> {
         match command {
             ReadCommand::ReadLoadCell => {
-                let (sig1_p, sig1_n, sig2_p, sig2_n) = {
-                    // call reading function, store result
-                    (
-                        port.read_input_registers(R_REG0, 1).await??[0] as i16, // sig1_p
-                        port.read_input_registers(R_REG1, 1).await??[0] as i16, // sig1_m
-                        port.read_input_registers(R_REG2, 1).await??[0] as i16, // sig2_p
-                        port.read_input_registers(R_REG3, 1).await??[0] as i16, // sig2_m
-                    )
+                let read_response = match self.load_cell_read(port).await? {
+                    Ok(response) => response,
+                    Err(e) => Response::ReadError(e),
                 };
-
-                let load1: f64 = self.analog_lbs(sig1_p, sig1_n, self.properties.tare);
-                let load2: f64 = self.analog_lbs(sig2_p, sig2_n, self.properties.tare);
-
-                response = Response::LoadCellResponse(load1, load2)
             }
         }
     }
 
-    //entry function
-    pub async fn solenoid_write(
+    async fn load_cell_read(&self, port: &mut Context) -> Result<Response, Box<dyn Error>> {
+        let (sig1_p, sig1_n, sig2_p, sig2_n) = {
+            // call reading function, store result
+            (
+                port.read_input_registers(R_REG0, 1).await??[0] as i16, // sig1_p
+                port.read_input_registers(R_REG1, 1).await??[0] as i16, // sig1_m
+                port.read_input_registers(R_REG2, 1).await??[0] as i16, // sig2_p
+                port.read_input_registers(R_REG3, 1).await??[0] as i16, // sig2_m
+            )
+        };
+
+        let load1: f64 = self.analog_lbs(sig1_p, sig1_n, self.properties.tare);
+        let load2: f64 = self.analog_lbs(sig2_p, sig2_n, self.properties.tare);
+
+        let load_cell = LoadCell::new(load1, load2);
+        response = Response::LoadCellResponse(LoadCell)
+    }
+
+    async fn solenoid_write(
         &mut self,
         port: &mut Context,
-        solenoid_command: Solenoid,
+        solenoid_command: SolenoidCommand,
     ) -> Result<Response, Box<dyn Error>> {
-        loop {
-            match solenoid_command {
-                Solenoid::Extrude => {
-                    //switch to extrude
-                    let _ = port
-                        .write_single_coil(self.properties.w_coil1, false)
-                        .await?; // turn refill sol off
-                    let _ = port
-                        .write_single_coil(self.properties.w_coil0, true)
-                        .await?; // turn extrude sol on
-                    response = Response::SetSolenoidResponse(solenoid_command)
-                }
+        match solenoid_command {
+            SolenoidCommand::Extrude => {
+                //switch to extrude
+                let _ = port
+                    .write_single_coil(self.properties.w_coil1, false)
+                    .await?; // turn refill sol off
+                let _ = port
+                    .write_single_coil(self.properties.w_coil0, true)
+                    .await?; // turn extrude sol on
+                response = Response::SetSolenoidResponse(solenoid_command)
+            }
 
-                Solenoid::Refill => {
-                    //switch to refill
-                    let _ = port.write_single_coil(W_COIL0, false).await?; // turn extrude sol off
-                    let _ = port.write_single_coil(W_COIL1, true).await?; // turn refill sol on
-                    response = Response::SetSolenoidResponse(solenoid_command)
-                }
+            SolenoidCommand::Refill => {
+                //switch to refill
+                let _ = port.write_single_coil(W_COIL0, false).await?; // turn extrude sol off
+                let _ = port.write_single_coil(W_COIL1, true).await?; // turn refill sol on
+                response = Response::SetSolenoidResponse(solenoid_command)
+            }
 
-                Solenoid::Close => {
-                    //close valves
-                    let _ = port.write_single_coil(W_COIL1, false).await?; // turn refill sol off
-                    let _ = port.write_single_coil(W_COIL0, false).await?; // turn extrude sol off
-                    response = Response::SetSolenoidResponse(solenoid_command)
-                }
+            SolenoidCommand::Close => {
+                //close valves
+                let _ = port.write_single_coil(W_COIL1, false).await?; // turn refill sol off
+                let _ = port.write_single_coil(W_COIL0, false).await?; // turn extrude sol off
+                response = Response::SetSolenoidResponse(solenoid_command)
             }
         }
     }
 
-    async fn tare(&self, port: &Mutex<Context>) -> Result<Cell<f64>, Box<dyn Error>> {
+    async fn tare(&self, port: &Arc<Mutex<Context>>) -> Result<Cell<f64>, Box<dyn Error>> {
         let mut tare_readings: Vec<f64> = Vec::new();
+        let mut port = port.lock().await;
 
         // Loop until 100 successful readings.
         while tare_readings.len() < 100 {
             let (sig1_p, sig1_n) = {
-                let mut port = port.lock().await;
                 (
                     port.read_input_registers(R_REG0, 1).await??[0] as i16,
                     port.read_input_registers(R_REG1, 1).await??[0] as i16,

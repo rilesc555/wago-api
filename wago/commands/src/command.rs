@@ -1,12 +1,11 @@
 use crate::data_types::types::{ReadLoadCell, ReadPressureGauge, ReadTempSensors, ReadToolProbe};
-use crate::solenoid::SetSolenoid;
+use crate::solenoid::SetSolenoidCommand;
 use serde::{Deserialize, Serialize};
-use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum WriteCommand {
-    SetSolenoid(SetSolenoid),
+    SetSolenoid(SetSolenoidCommand),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
