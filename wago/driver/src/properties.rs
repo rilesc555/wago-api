@@ -1,3 +1,5 @@
+use std::cell::Cell;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
@@ -9,6 +11,7 @@ pub struct TargetProperties {
     pub press_max: f32,
     pub mv_range: f64,
     pub excit_voltage: f64,
+    pub tare: Cell<f64>,
 
     /**** CARD REGISTERS/COILS AND ASSIGNMENTS ****/
     // READ REGISTERS/COILS by card
@@ -49,9 +52,9 @@ pub struct TargetProperties {
     pub w_coil6: u16,
     pub w_coil7: u16,
 
-    w_reg8: u16,
-    w_reg9: u16,
-    w_reg10: u16,
+    pub w_reg8: u16,
+    pub w_reg9: u16,
+    pub w_reg10: u16,
 }
 
 impl TargetProperties {
@@ -75,6 +78,7 @@ impl TargetProperties {
             press_max: todo!(),
             mv_range: todo!(),
             excit_voltage: todo!(),
+            tare: todo!(),
             r_reg0: todo!(),
             r_reg1: todo!(),
             r_reg2: todo!(),
@@ -116,6 +120,7 @@ impl Default for TargetProperties {
             press_max: 90.0,
             mv_range: 15.0,
             excit_voltage: 5.0,
+            tare: 0.0,
             r_reg0: 0,
             r_reg1: 1,
             r_reg2: 2,

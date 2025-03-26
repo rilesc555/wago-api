@@ -1,22 +1,22 @@
 use serde::{Deserialize, Serialize};
 
-use crate::data_types::types::Solenoid;
+use crate::data_types::types::SolenoidCommand;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct SetSolenoid {
-    pub solenoid: Solenoid,
+pub struct SetSolenoidCommand {
+    pub solenoid: SolenoidCommand,
 }
 
-impl SetSolenoid {
-    pub fn new(solenoid: Solenoid) -> Self {
+impl SetSolenoidCommand {
+    pub fn new(solenoid: SolenoidCommand) -> Self {
         Self { solenoid }
     }
 }
 
-impl Default for SetSolenoid {
+impl Default for SetSolenoidCommand {
     fn default() -> Self {
         Self {
-            solenoid: Solenoid::Close,
+            solenoid: SolenoidCommand::Close,
         }
     }
 }

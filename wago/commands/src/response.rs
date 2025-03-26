@@ -1,16 +1,12 @@
-use crate::data_types::types::Solenoid;
+use crate::data_types::types::{LoadCell, Solenoid};
+use std::error::Error;
 
-#[derive(Debug, Clone)]
-pub enum ReadResponse {
-    LoadCellResponse,
+#[derive(Debug)]
+pub enum Response {
+    LoadCellResponse(LoadCell),
     ToolProbeResponse,
     TempSensorResponse,
     PressureGaugeResponse,
-}
-
-pub enum WriteResponse {}
-
-pub enum Response {
     SetSolenoidResponse(Solenoid),
-    WriteError(error),
+    WriteError(Box<dyn Error>),
 }
