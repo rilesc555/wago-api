@@ -26,6 +26,29 @@ impl Clone for Response {
     }
 }
 
-impl Into<String> for Response {
-    fn into(self) -> String {}
+impl From<Response> for String {
+    // Use From<Response> which automatically provides Into<String>
+    fn from(response: Response) -> String {
+        match response {
+            Response::LoadCellResponse(lc) => {
+                // Assuming LoadCell has a meaningful Debug or Display implementation
+                format!("Load Cell Response: {:?}", lc)
+            }
+            Response::ToolProbeResponse => "Tool Probe Response".to_string(),
+            Response::TempSensorResponse => "Temperature Sensor Response".to_string(),
+            Response::PressureGaugeResponse => "Pressure Gauge Response".to_string(),
+            Response::SetSolenoidResponse(cmd) => {
+                // Assuming SolenoidCommand has a meaningful Debug or Display implementation
+                format!("Set Solenoid Response: {:?}", cmd)
+            }
+            Response::WriteError(e) => {
+                // Use the error's Display implementation
+                format!("Write Error: {}", e)
+            }
+            Response::ReadError(e) => {
+                // Use the error's Display implementation
+                format!("Read Error: {}", e)
+            }
+        }
+    }
 }
