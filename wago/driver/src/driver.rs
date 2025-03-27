@@ -125,32 +125,39 @@ async fn send_read_command(
                             let load1: f64 = analog_lbs(sig1_p, sig1_n, props.tare, props);
                             let load2: f64 = analog_lbs(sig2_p, sig2_n, props.tare, props);
 
-                            let response = Response::LoadCellResponse(LoadCell::new(load1, load2));
-                            response
+                            Response::LoadCellResponse(LoadCell::new(load1, load2))
                         }
 
                         _ => {
                             let error_message = format!(
-                                            "Load Cell Read Error: Expected 4 registers for load cells, but received {}",
-                                            new_vec.len()
-                                        );
-                            let error: Box<dyn Error + Sync + Send> = error_message.into();
-                            let response = Response::ReadError(error);
-                            response
+                                "Load Cell Read Error: Expected 4 registers for load cells, but received {}",
+                                new_vec.len()
+                            );
+                            let error: Box<dyn Error + Send + Sync> = error_message.into();
+                            Response::ReadError(error)
                         }
                     }
                 }
                 Err(e) => {
-                    let response = Response::ReadError(Box::new(e));
-                    response
+                    // Simply convert the error to a string, which is guaranteed Send + Sync
+                    let error_message = format!("Modbus protocol error: {}", e);
+                    let error: Box<dyn Error + Send + Sync> = error_message.into();
+                    Response::ReadError(error)
                 }
             },
             Err(e) => {
-                let response = Response::ReadError(Box::new(e));
-                response
+                // Similarly convert this error to a string
+                let error_message = format!("Modbus communication error: {}", e);
+                let error: Box<dyn Error + Send + Sync> = error_message.into();
+                Response::ReadError(error)
             }
         },
-        _ => todo!(),
+        // Convert todo!() to return a proper Response
+        _ => {
+            let error_message = format!("Unimplemented read command: {:?}", command);
+            let error: Box<dyn Error + Send + Sync> = error_message.into();
+            Response::ReadError(error)
+        }
     }
 }
 
