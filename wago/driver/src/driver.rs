@@ -189,7 +189,10 @@ pub async fn solenoid_write(
     }
 }
 
-async fn tare(port: &Arc<Mutex<Context>>, props: &TargetProperties) -> Result<f64, Box<dyn Error>> {
+async fn tare(
+    port: &Arc<Mutex<Context>>,
+    props: &TargetProperties,
+) -> Result<f64, Box<dyn Error + Send + Sync>> {
     let mut tare_readings: Vec<f64> = Vec::new();
 
     let mut context = port.lock().await;
