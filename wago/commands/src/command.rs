@@ -1,4 +1,4 @@
-use crate::data_types::types::{ReadLoadCell, ReadPressureGauge, ReadTempSensors, ReadToolProbe};
+use crate::data_types::types::{ReadPressureGauge, ReadTempSensors, ReadToolProbe};
 use crate::solenoid::SetSolenoidCommand;
 use serde::{Deserialize, Serialize};
 use strum_macros::EnumIter;
@@ -25,7 +25,7 @@ pub enum Priority {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, EnumIter)]
 pub enum ReadCommand {
-    ReadLoadCell(ReadLoadCell),
+    ReadLoadCell,
     ReadPressureGauge(ReadPressureGauge),
     ReadTempSensors(ReadTempSensors),
     ReadToolProbe(ReadToolProbe),
