@@ -57,7 +57,7 @@ pub struct TargetProperties {
 
 impl TargetProperties {
     pub fn new(ip: &str) -> Self {
-        return Self {
+        Self {
             ip: ip.to_string(),
             w_reg0: todo!(),
             w_reg1: todo!(),
@@ -93,7 +93,7 @@ impl TargetProperties {
             r_reg9: todo!(),
             r_reg10: todo!(),
             r_reg11: todo!(),
-        };
+        }
     }
 }
 

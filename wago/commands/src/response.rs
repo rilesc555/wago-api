@@ -25,3 +25,7 @@ impl Clone for Response {
         }
     }
 }
+
+impl Into<String> for Response {
+    fn into(self) -> String {}
+}

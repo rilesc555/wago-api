@@ -27,7 +27,10 @@ impl WagoDriver {
     }
     pub async fn connect(
         &mut self,
-    ) -> Result<(mpsc::Sender<WriteMessage>, broadcast::Receiver<Response>), Box<dyn Error>> {
+    ) -> Result<
+        (mpsc::Sender<WriteMessage>, broadcast::Receiver<Response>),
+        Box<dyn Error + Sync + Send>,
+    > {
         let properties_clone = self.properties.clone();
 
         let socket_addr: SocketAddr = properties_clone.ip.parse()?;
