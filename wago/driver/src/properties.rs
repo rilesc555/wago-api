@@ -100,7 +100,7 @@ impl TargetProperties {
 impl Default for TargetProperties {
     fn default() -> Self {
         return Self {
-            ip: "10.22.1.201:502".to_string(),
+            ip: "10.22.1.1:502".to_string(),
             w_reg0: 0,
             w_reg1: 1,
             w_reg2: 2,
