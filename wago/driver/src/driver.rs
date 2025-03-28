@@ -33,8 +33,23 @@ impl WagoDriver {
     > {
         let properties_clone = self.properties.clone();
 
-        let socket_addr: SocketAddr = properties_clone.ip.parse()?;
-        let conn = tcp::connect(socket_addr).await?;
+        // let socket_addr: SocketAddr = properties_clone.ip.parse()?;
+        match properties_clone.ip.parse::<SocketAddr>() {
+            Ok(socket_addr) => socket_addr,
+            Err(e) => {
+                let error: Box<dyn Error + Send + Sync> = format!("Invalid IP address: {}", e).into();
+                return Err(error);
+            }
+        };
+
+        // let conn = tcp::connect(socket_addr).await?;
+        match tcp::connect(socket_addr).await {
+            Ok(conn) => conn,
+            Err(e) => {
+                let error: Box<dyn Error + Send + Sync> = format!("Connection error: {}", e).into();
+                return Err(error);
+            }
+        }
 
         let conn = Arc::new(Mutex::new(conn));
 
