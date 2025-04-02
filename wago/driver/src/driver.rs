@@ -37,7 +37,8 @@ impl WagoDriver {
         let socket_addr = match properties_clone.ip.parse::<SocketAddr>() {
             Ok(socket_addr) => socket_addr,
             Err(e) => {
-                let error: Box<dyn Error + Send + Sync> = format!("Invalid IP address: {}", e).into();
+                let error: Box<dyn Error + Send + Sync> =
+                    format!("Invalid IP address: {}", e).into();
                 return Err(error);
             }
         };
