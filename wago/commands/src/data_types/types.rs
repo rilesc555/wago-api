@@ -9,7 +9,7 @@ pub enum SolenoidCommand {
     Close,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
 pub struct LoadCell {
     pub load1: f64,
     pub load2: f64,
