@@ -11,8 +11,8 @@ pub enum SolenoidCommand {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct LoadCell {
-    load1: f64,
-    load2: f64,
+    pub load1: f64,
+    pub load2: f64,
 }
 
 impl LoadCell {
