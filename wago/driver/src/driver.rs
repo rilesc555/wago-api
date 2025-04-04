@@ -55,12 +55,12 @@ impl WagoDriver {
 
         let conn = Arc::new(Mutex::new(conn));
 
-        match tare(&conn, &properties_clone).await {
-            Ok(tare_value) => {
-                self.properties.tare = tare_value;
-            }
-            Err(e) => return Err(e),
-        }
+        //match tare(&conn, &properties_clone).await {
+        //    Ok(tare_value) => {
+        //        self.properties.tare = tare_value;
+        //    }
+        //    Err(e) => return Err(e),
+        //}
         let properties_clone = self.properties.clone();
 
         let (channel_tx, channel_rx) = broadcast::channel::<Response>(100);
