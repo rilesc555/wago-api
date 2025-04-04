@@ -35,6 +35,7 @@ impl WagoDriver {
 
         // let socket_addr: SocketAddr = properties_clone.ip.parse()?;
         let socket_addr = match properties_clone.ip.parse::<SocketAddr>() {
+            println!("attempting to connect to {socket_addr}");
             Ok(socket_addr) => socket_addr,
             Err(e) => {
                 let error: Box<dyn Error + Send + Sync> =
