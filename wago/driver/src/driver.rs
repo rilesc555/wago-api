@@ -86,10 +86,10 @@ fn spawn_queue_loop(
     props: TargetProperties,
 ) -> tokio::task::JoinHandle<()> {
     tokio::spawn(async move {
-        for command in ReadCommand::iter() {
-            let response = send_read_command(command, &port, &props).await;
-            let _ = channel_tx.send(response);
-        }
+        //for command in ReadCommand::iter() {
+        //    let response = send_read_command(command, &port, &props).await;
+        //    let _ = channel_tx.send(response);
+        //}
 
         loop {
             let mut queue = Vec::new();
