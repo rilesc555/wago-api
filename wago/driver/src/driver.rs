@@ -56,7 +56,7 @@ impl WagoDriver {
             }
             Err(_e) => {
                 let error: Box<dyn Error + Send + Sync> = format!(
-                    "Attempted connection to PLC timed out after {:?} second",
+                    "Attempted connection to PLC timed out after {:?}",
                     duration
                 )
                 .into();
