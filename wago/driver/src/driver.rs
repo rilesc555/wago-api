@@ -4,8 +4,10 @@ use std::error::Error;
 // use tokio_modbus::prelude::*;
 use std::net::SocketAddr;
 use std::sync::{mpsc, Arc};
+use std::time::Duration;
 use strum::IntoEnumIterator;
 use tokio::sync::{broadcast, Mutex};
+use tokio::time::timeout;
 use tokio_modbus::client::tcp;
 use tokio_modbus::client::{Context, Reader, Writer};
 use wago_commands::command::{ReadCommand, WriteCommand, WriteMessage};
@@ -44,11 +46,20 @@ impl WagoDriver {
         };
 
         println!("attempting to connect to {socket_addr}");
-        // let conn = tcp::connect(socket_addr).await?;
-        let conn = match tcp::connect(socket_addr).await {
-            Ok(conn) => conn,
-            Err(e) => {
+
+        let duration: Duration = Duration::from_secs(1);
+        let conn: Context = match timeout(duration, tcp::connect(socket_addr)).await {
+            Ok(Ok(conn)) => conn,
+            Ok(Err(e)) => {
                 let error: Box<dyn Error + Send + Sync> = format!("Connection error: {}", e).into();
+                return Err(error);
+            }
+            Err(_e) => {
+                let error: Box<dyn Error + Send + Sync> = format!(
+                    "Attempted connection to PLC timed out after {:?} second",
+                    duration
+                )
+                .into();
                 return Err(error);
             }
         };
